@@ -9,7 +9,7 @@ from open_webui.models.groups import Groups
 
 
 from pydantic import BaseModel, ConfigDict
-from sqlalchemy import BigInteger, Column, String, Text
+from sqlalchemy import BigInteger, Column, String, Text, Boolean
 
 ####################
 # User DB Schema
@@ -24,6 +24,7 @@ class User(Base):
     email = Column(String)
     role = Column(String)
     profile_image_url = Column(Text)
+    trial = Column(Boolean, default=True)
 
     last_active_at = Column(BigInteger)
     updated_at = Column(BigInteger)
@@ -58,6 +59,7 @@ class UserModel(BaseModel):
     info: Optional[dict] = None
 
     oauth_sub: Optional[str] = None
+    trial: bool = True
 
     model_config = ConfigDict(from_attributes=True)
 
