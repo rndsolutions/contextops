@@ -2693,3 +2693,6 @@ LDAP_CA_CERT_FILE = PersistentConfig(
 LDAP_CIPHERS = PersistentConfig(
     "LDAP_CIPHERS", "ldap.server.ciphers", os.environ.get("LDAP_CIPHERS", "ALL")
 )
+
+#TRIAL PERIOD
+TRIAL_PERIOD = int(os.environ.get("TRIAL_PERIOD", "7"))  # Default to 7 days if not set 

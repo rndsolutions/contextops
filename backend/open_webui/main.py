@@ -92,6 +92,7 @@ from open_webui.models.users import UserModel, Users
 from open_webui.models.chats import Chats
 
 from open_webui.config import (
+    TRIAL_PERIOD,
     LICENSE_KEY,
     # Ollama
     ENABLE_OLLAMA_API,
@@ -1360,6 +1361,10 @@ async def update_webhook_url(form_data: UrlForm, user=Depends(get_admin_user)):
     app.state.WEBHOOK_URL = app.state.config.WEBHOOK_URL
     return {"url": app.state.config.WEBHOOK_URL}
 
+
+@app.get("/api/config/trial-period", response_model=dict)
+async def get_trial_period():
+    return JSONResponse(content={"trial_period": TRIAL_PERIOD})
 
 @app.get("/api/version")
 async def get_app_version():
