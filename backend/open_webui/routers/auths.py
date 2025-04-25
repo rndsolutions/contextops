@@ -101,7 +101,7 @@ async def get_session_user(
     user_permissions = get_permissions(
         user.id, request.app.state.config.USER_PERMISSIONS
     )
-
+    
     return {
         "token": token,
         "token_type": "Bearer",
@@ -112,6 +112,9 @@ async def get_session_user(
         "role": user.role,
         "profile_image_url": user.profile_image_url,
         "permissions": user_permissions,
+        "trial": user.trial,
+        "trial_extension_days": user.trial_extension_days,
+        "created_at": user.created_at,     
     }
 
 
@@ -413,6 +416,9 @@ async def signin(request: Request, response: Response, form_data: SigninForm):
             "role": user.role,
             "profile_image_url": user.profile_image_url,
             "permissions": user_permissions,
+            "trial": user.trial,
+            "trial_extension_days": user.trial_extension_days,
+            "created_at": user.created_at     
         }
     else:
         raise HTTPException(400, detail=ERROR_MESSAGES.INVALID_CRED)
@@ -527,6 +533,9 @@ async def signup(request: Request, response: Response, form_data: SignupForm):
                 "role": user.role,
                 "profile_image_url": user.profile_image_url,
                 "permissions": user_permissions,
+                "trial": user.trial,
+                "trial_extension_days": user.trial_extension_days,
+                "created_at": user.created_at     
             }
         else:
             raise HTTPException(500, detail=ERROR_MESSAGES.CREATE_USER_ERROR)

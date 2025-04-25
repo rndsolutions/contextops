@@ -53,6 +53,9 @@ class UserResponse(BaseModel):
     name: str
     role: str
     profile_image_url: str
+    trial: bool
+    trial_extension_days: int
+    created_at: int
 
 
 class SigninResponse(Token, UserResponse):

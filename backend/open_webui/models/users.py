@@ -25,6 +25,8 @@ class User(Base):
     role = Column(String)
     profile_image_url = Column(Text)
     trial = Column(Boolean, default=True)
+    trial_extension_days = Column(BigInteger, default=0)
+
 
     last_active_at = Column(BigInteger)
     updated_at = Column(BigInteger)
@@ -53,6 +55,7 @@ class UserModel(BaseModel):
     last_active_at: int  # timestamp in epoch
     updated_at: int  # timestamp in epoch
     created_at: int  # timestamp in epoch
+    trial_extension_days: int = 0
 
     api_key: Optional[str] = None
     settings: Optional[UserSettings] = None
@@ -115,7 +118,7 @@ class UsersTable:
                     "role": role,
                     "profile_image_url": profile_image_url,
                     "last_active_at": int(time.time()),
-                    "created_at": int(time.time()),
+                    "created_at": int(time.time()),  # Ensure this is in seconds since the epoch
                     "updated_at": int(time.time()),
                     "oauth_sub": oauth_sub,
                 }
