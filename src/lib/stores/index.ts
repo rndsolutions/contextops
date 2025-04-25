@@ -232,4 +232,6 @@ type SessionUser = {
 	name: string;
 	role: string;
 	profile_image_url: string;
+	trial: boolean;
+	trial_extension_days: number;
 };
