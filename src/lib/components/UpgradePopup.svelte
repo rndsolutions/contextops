@@ -6,6 +6,10 @@
 	import { settings } from '$lib/stores';
 
 	let trialPeriod = 0; // Default value
+	/**
+	 * @type {{ email: any; } | null}
+	 */
+	let user = null;
 
 	async function fetchTrialPeriod() {
 		try {
@@ -49,12 +53,16 @@
 				priceId: 'pri_01jsphbckdbn9n60ysh9v29nvm',
 				quantity: 1
 			}
-		];
+		];		
+		var customer = {
+			email: user.email
+		}	
 
 		if (window.Paddle) {
 			debugger
 			window.Paddle.Checkout.open({				
-				items: itemsList
+				items: itemsList,
+				customer: customer
 			});
 		} else {
 			console.error('Paddle is not loaded');
@@ -65,6 +73,7 @@
 	onMount(async () => {
 		try {
 			const usr = await getSessionUser(localStorage.token);
+			user = usr;
 			await fetchTrialPeriod();
 			console.log('User:', usr);
 			remainingDays = await calculateRemainingDays(usr);
