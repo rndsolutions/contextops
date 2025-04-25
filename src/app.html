@@ -27,14 +27,14 @@
 
 		<script src="https://cdn.paddle.com/paddle/v2/paddle.js"></script>
 		<script type="text/javascript">
-		Paddle.Environment.set('sandbox');
-		Paddle.Initialize({ 
-			token: 'test_5528c8434ae121767aae61a12ce', // replace with a client-side token
-			eventCallback: function(data) {
-				debugger;
-				console.log('Paddle Callback: '+ data);
-			}
-		});
+			Paddle.Environment.set('sandbox');
+			Paddle.Initialize({
+				token: 'test_5528c8434ae121767aae61a12ce', // replace with a client-side token
+				eventCallback: function (data) {
+					debugger;
+					console.log('Paddle Callback: ' + data);
+				}
+			});
 		</script>
 
 		<script>

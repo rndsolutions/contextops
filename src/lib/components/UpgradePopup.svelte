@@ -47,20 +47,19 @@
 
 	// Paddle overlay open function
 	function openPaddleOverlay() {
-		
 		var itemsList = [
 			{
 				priceId: 'pri_01jsphbckdbn9n60ysh9v29nvm',
 				quantity: 1
 			}
-		];		
+		];
 		var customer = {
 			email: user.email
-		}	
+		};
 
 		if (window.Paddle) {
-			debugger
-			window.Paddle.Checkout.open({				
+			debugger;
+			window.Paddle.Checkout.open({
 				items: itemsList,
 				customer: customer
 			});

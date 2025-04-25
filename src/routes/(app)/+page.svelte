@@ -6,5 +6,4 @@
 
 <Help />
 <Chat />
-<UpgradePopup/>
-
+<UpgradePopup />
