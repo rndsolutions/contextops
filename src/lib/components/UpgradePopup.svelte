@@ -2,8 +2,8 @@
 	import { onMount } from 'svelte';
 
 	import { getSessionUser } from '$lib/apis/auths';
-	import { getUserById } from '$lib/apis/users';
 	import { WEBUI_BASE_URL } from '$lib/constants';
+	import { settings } from '$lib/stores';
 
 	let trialPeriod = 0; // Default value
 
@@ -29,23 +29,43 @@
 		if (!user || !user.created_at || typeof user.trial_extension_days !== 'number') {
 			throw new Error('Invalid user object');
 		}
-    const now = new Date();
-    // created_at is in seconds, convert to milliseconds
-    const createdAt = new Date(user.created_at * 1000);
-    
-    const extendedTrial = trialPeriod + (user.trial_extension_days || 0);
-    const trialEndTime = createdAt.getTime() + (extendedTrial * MS_PER_DAY);
-    const remainingTicks = Math.max(trialEndTime - now.getTime(), 0);
-    const remainingDays = Math.floor(remainingTicks / MS_PER_DAY); // Or use Math.round / Math.ceil
+		const now = new Date();
+		// created_at is in seconds, convert to milliseconds
+		const createdAt = new Date(user.created_at * 1000);
 
-    return  remainingDays;
+		const extendedTrial = trialPeriod + (user.trial_extension_days || 0);
+		const trialEndTime = createdAt.getTime() + extendedTrial * MS_PER_DAY;
+		const remainingTicks = Math.max(trialEndTime - now.getTime(), 0);
+		const remainingDays = Math.floor(remainingTicks / MS_PER_DAY); // Or use Math.round / Math.ceil
+
+		return remainingDays;
+	}
+
+	// Paddle overlay open function
+	function openPaddleOverlay() {
+		
+		var itemsList = [
+			{
+				priceId: 'pri_01jsphbckdbn9n60ysh9v29nvm',
+				quantity: 1
+			}
+		];
+
+		if (window.Paddle) {
+			debugger
+			window.Paddle.Checkout.open({				
+				items: itemsList
+			});
+		} else {
+			console.error('Paddle is not loaded');
+		}
 	}
 
 	// Fetch user data and calculate remaining trial days
 	onMount(async () => {
 		try {
 			const usr = await getSessionUser(localStorage.token);
-      await fetchTrialPeriod();
+			await fetchTrialPeriod();
 			console.log('User:', usr);
 			remainingDays = await calculateRemainingDays(usr);
 			// Keep popup always visible, so no change to isVisible
@@ -59,23 +79,24 @@
 	}
 </script>
 
-	<div
-		class="fixed bottom-4 right-4 bg-white shadow-lg rounded-lg p-4 flex flex-col items-center z-50"
+<div
+	class="fixed bottom-4 right-4 bg-white shadow-lg rounded-lg p-4 flex flex-col items-center z-50"
+>
+	<p class="text-gray-800 mb-4 text-center">
+		{#if remainingDays > 0}
+			🎉 Your trial ends in <strong>{remainingDays}</strong> days! 🎉
+		{:else}
+			Your trial has ended. Please upgrade to continue.
+		{/if}
+	</p>
+	<button
+		id="upgrade-btn"
+		class="bg-gradient-to-r from-blue-500 to-green-500 text-white px-5 py-3 rounded-full hover:from-blue-600 hover:to-green-600 transition"
+		on:click={openPaddleOverlay}
 	>
-		<p class="text-gray-800 mb-4 text-center">
-			{#if remainingDays > 0}
-				🎉 Your trial ends in <strong>{remainingDays}</strong> days! 🎉
-			{:else}
-				Your trial has ended. Please upgrade to continue.
-			{/if}
-		</p>
-		<button
-			id="upgrade-btn"
-			class="bg-gradient-to-r from-blue-500 to-green-500 text-white px-5 py-3 rounded-full hover:from-blue-600 hover:to-green-600 transition"
-		>
-			Upgrade Now
-		</button>
-	</div>
+		Upgrade Now
+	</button>
+</div>
 
 <style>
 	.fixed {
