@@ -47,8 +47,8 @@
 			const usr = await getSessionUser(localStorage.token);
       await fetchTrialPeriod();
 			console.log('User:', usr);
-			const remainingDays = await calculateRemainingDays(usr);
-			isVisible = remainingDays > 0;
+			remainingDays = await calculateRemainingDays(usr);
+			// Keep popup always visible, so no change to isVisible
 		} catch (error) {
 			console.error('Failed to fetch user info:', error);
 		}
@@ -59,13 +59,9 @@
 	}
 </script>
 
-{#if isVisible}
 	<div
 		class="fixed bottom-4 right-4 bg-white shadow-lg rounded-lg p-4 flex flex-col items-center z-50"
 	>
-		<button on:click={closePopup} class="absolute top-1 right-1 text-gray-500 hover:text-gray-700">
-			&times;
-		</button>
 		<p class="text-gray-800 mb-4 text-center">
 			{#if remainingDays > 0}
 				🎉 Your trial ends in <strong>{remainingDays}</strong> days! 🎉
@@ -80,7 +76,6 @@
 			Upgrade Now
 		</button>
 	</div>
-{/if}
 
 <style>
 	.fixed {
