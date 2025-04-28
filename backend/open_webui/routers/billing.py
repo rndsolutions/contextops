@@ -5,6 +5,7 @@ from sqlalchemy.orm import Session
 from open_webui.internal.db import get_db
 from open_webui.models.billing import Billing
 import dateutil.parser
+import json
 
 router = APIRouter(        
     responses={404: {"description": "Not found"}},
@@ -24,23 +25,31 @@ async def handle_billing_webhook(request: Request):
     Endpoint to receive billing webhook events from Paddle.
     Parses the incoming JSON payload and persists relevant data using BillingTable.
     """
-    payload = await request.json()
-    event_type = payload.get("alert_name")
+    from starlette.requests import ClientDisconnect
+
+    try:
+        payload = await request.json()
+    except ClientDisconnect:
+        # Client disconnected before sending full request body
+        # Log or handle as needed, here we return 400 Bad Request
+        return Response(status_code=status.HTTP_400_BAD_REQUEST, content="Client disconnected")
+
+    event_type = payload.get("event_type")
 
     with get_db() as db:
-        if event_type in ("transaction_created", "transaction_updated"):
-            transaction_data = payload.get("transaction", {})
+        if event_type in ("transaction.created", "transaction.updated"):
+            transaction_data = payload.get("data", {})
             if transaction_data:
                 # Prepare data dict for BillingTable
                 data = {
                     "id": transaction_data.get("id"),
-                    "details_totals": transaction_data.get("details", {}).get("totals"),
+                    "details_totals": json.dumps(transaction_data.get("details", {}).get("totals")),
                     "occurred_at": parse_datetime(payload.get("notification", {}).get("occurred_at")),
-                    "payments": transaction_data.get("payments", []),
+                    "payments": json.dumps(transaction_data.get("payments", [])),
                 }
                 Billing.insert_transaction(db, data)
 
-        elif event_type in ("subscription_created", "subscription_updated"):
+        elif event_type in ("subscription.created", "subscription.updated"):
             subscription_data = payload.get("subscription", {})
             if subscription_data:
                 # Prepare data dict for BillingTable

@@ -168,4 +168,12 @@ class BillingTable:
             raise
 
 
+from pydantic import BaseModel
+from typing import List, Optional, Dict, Any
+
+class BillingResponse(BaseModel):
+    subscription: Optional[Dict[str, Any]] = None
+    transaction: Optional[Dict[str, Any]] = None
+    message: Optional[str] = None
+
 Billing = BillingTable()
