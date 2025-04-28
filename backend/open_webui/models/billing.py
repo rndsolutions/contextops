@@ -7,6 +7,9 @@ from sqlalchemy.orm import relationship, Session
 from sqlalchemy.exc import SQLAlchemyError
 from open_webui.internal.db import Base
 
+# Used it for refrence implementation
+# https://developer.paddle.com/build/subscriptions/provision-access-webhooks
+
 class SubscriptionItem(Base):
     __tablename__ = "subscription_items"
 
