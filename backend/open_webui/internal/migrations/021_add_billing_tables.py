@@ -35,7 +35,7 @@ def migrate(migrator: Migrator, database: pw.Database, *, fake=False):
             {
                 "id": pw.TextField(primary_key=True),
                 "subscription_id": pw.ForeignKeyField(
-                    "subscriptions", "id", on_delete="CASCADE"
+                    "subscriptions", "id", on_delete="CASCADE", null=False
                 ),
                 "price_id": pw.TextField(null=False),
                 "quantity": pw.IntegerField(null=False),
@@ -67,7 +67,7 @@ def migrate(migrator: Migrator, database: pw.Database, *, fake=False):
             {
                 "id": pw.TextField(primary_key=True),
                 "transaction_id": pw.ForeignKeyField(
-                    "transactions", "id", on_delete="CASCADE"
+                    "transactions", "id", on_delete="CASCADE", null=False
                 ),
                 "method_details": pw.JSONField(null=True),
                 "Meta": type("Meta", (), {"table_name": "transaction_payments"}),
