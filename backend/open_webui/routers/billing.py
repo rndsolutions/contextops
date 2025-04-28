@@ -3,13 +3,7 @@ from datetime import datetime
 from typing import Optional
 from sqlalchemy.orm import Session
 from open_webui.internal.db import get_db
-from open_webui.models.billing import (
-    Subscription,
-    SubscriptionItem,
-    Transaction,
-    TransactionPayment,
-    Billing,
-)
+from open_webui.models.billing import Billing
 import dateutil.parser
 
 router = APIRouter(
@@ -36,7 +30,7 @@ async def handle_billing_webhook(request: Request):
     event_type = payload.get("alert_name")
 
     with get_db() as db:
-        if event_type == "transaction_created" or event_type == "transaction_updated":
+        if event_type in ("transaction_created", "transaction_updated"):
             transaction_data = payload.get("transaction", {})
             if transaction_data:
                 # Prepare data dict for BillingTable
@@ -48,7 +42,7 @@ async def handle_billing_webhook(request: Request):
                 }
                 Billing.insert_transaction(db, data)
 
-        elif event_type == "subscription_created" or event_type == "subscription_updated":
+        elif event_type in ("subscription_created", "subscription_updated"):
             subscription_data = payload.get("subscription", {})
             if subscription_data:
                 # Prepare data dict for BillingTable
