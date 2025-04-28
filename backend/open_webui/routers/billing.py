@@ -6,9 +6,7 @@ from open_webui.internal.db import get_db
 from open_webui.models.billing import Billing
 import dateutil.parser
 
-router = APIRouter(
-    prefix="/webhooks/billing",
-    tags=["billing_webhooks"],
+router = APIRouter(        
     responses={404: {"description": "Not found"}},
 )
 

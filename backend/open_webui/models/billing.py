@@ -2,7 +2,7 @@ import time
 import uuid
 from typing import Optional, List, Dict, Any
 
-from sqlalchemy import Column, Char, Integer, DateTime, ForeignKey, Text, BigInteger
+from sqlalchemy import Column, String, Integer, DateTime, ForeignKey, Text, BigInteger
 from sqlalchemy.orm import relationship, Session
 from sqlalchemy.exc import SQLAlchemyError
 from open_webui.internal.db import Base
@@ -13,22 +13,22 @@ from open_webui.internal.db import Base
 class SubscriptionItem(Base):
     __tablename__ = "subscription_items"
 
-    id = Column(Char(255), primary_key=True, index=True, default=lambda: str(uuid.uuid4()))
-    subscription_id = Column(Char(255), ForeignKey("subscriptions.id", ondelete="CASCADE"), nullable=False)
-    price_id = Column(Char(255), nullable=False)
+    id = Column(String(255), primary_key=True, index=True, default=lambda: str(uuid.uuid4()))
+    subscription_id = Column(String(255), ForeignKey("subscriptions.id", ondelete="CASCADE"), nullable=False)
+    price_id = Column(String(255), nullable=False)
     quantity = Column(Integer, nullable=False)
-    product_id = Column(Char(255), nullable=True)
+    product_id = Column(String(255), nullable=True)
 
 class Subscription(Base):
     __tablename__ = "subscriptions"
 
-    id = Column(Char(255), primary_key=True, index=True)  # subscription.id from Paddle
-    status = Column(Char(255), nullable=True)
-    collection_mode = Column(Char(255), nullable=True)
-    scheduled_change = Column(Char(255), nullable=True)
+    id = Column(String(255), primary_key=True, index=True)  # subscription.id from Paddle
+    status = Column(String(255), nullable=True)
+    collection_mode = Column(String(255), nullable=True)
+    scheduled_change = Column(String(255), nullable=True)
     next_billed_at = Column(DateTime, nullable=True)
-    current_billing_period = Column(Char(255), nullable=True)
-    billing_details = Column(Char(255), nullable=True)
+    current_billing_period = Column(String(255), nullable=True)
+    billing_details = Column(String(255), nullable=True)
     occurred_at = Column(DateTime, nullable=True)  # notification.occurred_at
 
     created_at = Column(BigInteger, default=lambda: int(time.time_ns()))
@@ -45,15 +45,15 @@ class Subscription(Base):
 class TransactionPayment(Base):
     __tablename__ = "transaction_payments"
 
-    id = Column(Char(255), primary_key=True, index=True, default=lambda: str(uuid.uuid4()))
-    transaction_id = Column(Char(255), ForeignKey("transactions.id", ondelete="CASCADE"), nullable=False)
-    method_details = Column(Char(255), nullable=True)
+    id = Column(String(255), primary_key=True, index=True, default=lambda: str(uuid.uuid4()))
+    transaction_id = Column(String(255), ForeignKey("transactions.id", ondelete="CASCADE"), nullable=False)
+    method_details = Column(String(255), nullable=True)
 
 class Transaction(Base):
     __tablename__ = "transactions"
 
-    id = Column(Char(255), primary_key=True, index=True)  # transaction id from Paddle
-    details_totals = Column(Char(255), nullable=True)
+    id = Column(String(255), primary_key=True, index=True)  # transaction id from Paddle
+    details_totals = Column(String(255), nullable=True)
     occurred_at = Column(DateTime, nullable=True)  # notification.occurred_at
 
     created_at = Column(BigInteger, default=lambda: int(time.time_ns()))
