@@ -12,9 +12,14 @@ router = APIRouter(
 )
 
 def parse_datetime(dt_str: Optional[str]) -> Optional[datetime]:
-    if dt_str:
+    if dt_str and isinstance(dt_str, str) and dt_str.strip():
         try:
-            return dateutil.parser.isoparse(dt_str)
+            dt = dateutil.parser.isoparse(dt_str)
+            # Additional sanity check: datetime should not be in the future by more than 1 day
+            from datetime import datetime, timedelta
+            if dt > datetime.utcnow() + timedelta(days=1):
+                return None
+            return dt
         except Exception:
             return None
     return None
@@ -31,39 +36,79 @@ async def handle_billing_webhook(request: Request):
         payload = await request.json()
     except ClientDisconnect:
         # Client disconnected before sending full request body
-        # Log or handle as needed, here we return 400 Bad Request
         return Response(status_code=status.HTTP_400_BAD_REQUEST, content="Client disconnected")
 
     event_type = payload.get("event_type")
 
     with get_db() as db:
-        if event_type in ("transaction.created", "transaction.updated"):
+        # Handle transaction events
+        if event_type in ("transaction.paid4", "transaction.completed3"):
             transaction_data = payload.get("data", {})
             if transaction_data:
-                # Prepare data dict for BillingTable
-                data = {
+                # Compose a subscription_id if available
+                subscription_id = transaction_data.get("subscription_id") or transaction_data.get("subscription", {}).get("id")
+                # Compose transaction dict for upsert
+                transaction_dict = {
                     "id": transaction_data.get("id"),
-                    "details_totals": json.dumps(transaction_data.get("details", {}).get("totals")),
-                    "occurred_at": parse_datetime(payload.get("notification", {}).get("occurred_at")),
-                    "payments": json.dumps(transaction_data.get("payments", [])),
+                    "items": transaction_data.get("items"),
+                    "status": transaction_data.get("status"),
+                    "discount": transaction_data.get("discount"),
+                    "paused_at": parse_datetime(transaction_data.get("paused_at")),
+                    "address_id": transaction_data.get("address_id"),
+                    "created_at": parse_datetime(transaction_data.get("created_at")),
+                    "started_at": parse_datetime(transaction_data.get("started_at")),
+                    "updated_at": parse_datetime(transaction_data.get("updated_at")),
+                    "business_id": transaction_data.get("business_id"),
+                    "canceled_at": parse_datetime(transaction_data.get("canceled_at")),
+                    "custom_data": transaction_data.get("custom_data"),
+                    "customer_id": transaction_data.get("customer_id"),
+                    "import_meta": transaction_data.get("import_meta"),
+                    "billing_cycle": transaction_data.get("billing_cycle"),
+                    "currency_code": transaction_data.get("currency_code"),
+                    "next_billed_at": parse_datetime(transaction_data.get("next_billed_at")),
+                    "transaction_id": transaction_data.get("id"),
+                    "billing_details": transaction_data.get("billing_details"),
+                    "collection_mode": transaction_data.get("collection_mode"),
+                    "first_billed_at": parse_datetime(transaction_data.get("first_billed_at")),
+                    "scheduled_change": transaction_data.get("scheduled_change"),
+                    "current_billing_period": transaction_data.get("current_billing_period"),
                 }
-                Billing.insert_transaction(db, data)
+                # Remove keys with None values to avoid overwriting with nulls
+                transaction_dict = {k: v for k, v in transaction_dict.items() if v is not None}
+                Billing.insert_subscription(db, transaction_dict)
 
+        # Handle subscription events
         elif event_type in ("subscription.created", "subscription.updated"):
-            subscription_data = payload.get("subscription", {})
+            subscription_data = payload.get("data", {})
             if subscription_data:
                 # Prepare data dict for BillingTable
                 data = {
                     "id": subscription_data.get("id"),
+                    "items": subscription_data.get("items"),
                     "status": subscription_data.get("status"),
-                    "collection_mode": subscription_data.get("collection_mode"),
-                    "scheduled_change": subscription_data.get("scheduled_change"),
+                    "discount": subscription_data.get("discount"),
+                    "paused_at": parse_datetime(subscription_data.get("paused_at")),
+                    "address_id": subscription_data.get("address_id"),
+                    "created_at": parse_datetime(subscription_data.get("created_at")),
+                    "started_at": parse_datetime(subscription_data.get("started_at")),
+                    "updated_at": parse_datetime(subscription_data.get("updated_at")),
+                    "business_id": subscription_data.get("business_id"),
+                    "canceled_at": parse_datetime(subscription_data.get("canceled_at")),
+                    "custom_data": subscription_data.get("custom_data"),
+                    "customer_id": subscription_data.get("customer_id"),
+                    "import_meta": subscription_data.get("import_meta"),
+                    "billing_cycle": subscription_data.get("billing_cycle"),
+                    "currency_code": subscription_data.get("currency_code"),
                     "next_billed_at": parse_datetime(subscription_data.get("next_billed_at")),
-                    "current_billing_period": subscription_data.get("current_billing_period"),
+                    "transaction_id": subscription_data.get("transaction_id"),
                     "billing_details": subscription_data.get("billing_details"),
-                    "occurred_at": parse_datetime(payload.get("notification", {}).get("occurred_at")),
-                    "items": subscription_data.get("items", []),
+                    "collection_mode": subscription_data.get("collection_mode"),
+                    "first_billed_at": parse_datetime(subscription_data.get("first_billed_at")),
+                    "scheduled_change": subscription_data.get("scheduled_change"),
+                    "current_billing_period": subscription_data.get("current_billing_period"),
                 }
+                # Remove keys with None values to avoid overwriting with nulls
+                data = {k: v for k, v in data.items() if v is not None}
                 Billing.insert_subscription(db, data)
 
         else:
