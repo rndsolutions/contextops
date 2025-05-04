@@ -78,6 +78,44 @@ class BillingTable:
             db.rollback()
             raise
 
+    def insert_transaction(self, db: Session, transaction_data: Dict[str, Any]) -> Optional["Transaction"]:
+        transaction_id = transaction_data.get("id")
+        if not transaction_id:
+            return None
+        try:
+            transaction = db.query(Transaction).filter(Transaction.id == transaction_id).first()
+            if not transaction:
+                transaction = Transaction(id=transaction_id)
+            transaction.items = transaction_data.get("items")
+            transaction.origin = transaction_data.get("origin")
+            transaction.status = transaction_data.get("status")
+            transaction.details = transaction_data.get("details")
+            transaction.checkout = transaction_data.get("checkout")
+            transaction.payments = transaction_data.get("payments")
+            transaction.billed_at = transaction_data.get("billed_at")
+            transaction.address_id = transaction_data.get("address_id")
+            transaction.created_at = transaction_data.get("created_at")
+            transaction.invoice_id = transaction_data.get("invoice_id")
+            transaction.revised_at = transaction_data.get("revised_at")
+            transaction.updated_at = transaction_data.get("updated_at")
+            transaction.business_id = transaction_data.get("business_id")
+            transaction.custom_data = transaction_data.get("custom_data")
+            transaction.customer_id = transaction_data.get("customer_id")
+            transaction.discount_id = transaction_data.get("discount_id")
+            transaction.receipt_data = transaction_data.get("receipt_data")
+            transaction.currency_code = transaction_data.get("currency_code")
+            transaction.billing_period = transaction_data.get("billing_period")
+            transaction.invoice_number = transaction_data.get("invoice_number")
+            transaction.billing_details = transaction_data.get("billing_details")
+            transaction.collection_mode = transaction_data.get("collection_mode")
+            transaction.subscription_id = transaction_data.get("subscription_id")
+            db.add(transaction)
+            db.commit()
+            return transaction
+        except SQLAlchemyError:
+            db.rollback()
+            raise
+
     def get_subscription(self, db: Session, subscription_id: str) -> Optional[Subscription]:
         try:
             return db.query(Subscription).filter(Subscription.id == subscription_id).first()
@@ -97,6 +135,34 @@ class BillingTable:
 
 from pydantic import BaseModel
 from typing import List, Optional, Dict, Any
+
+class Transaction(Base):
+    __tablename__ = "transactions"
+
+    id = Column(String(255), primary_key=True, index=True)
+    items = Column(JSON, nullable=True)
+    origin = Column(String(255), nullable=True)
+    status = Column(String(255), nullable=True)
+    details = Column(JSON, nullable=True)
+    checkout = Column(JSON, nullable=True)
+    payments = Column(JSON, nullable=True)
+    billed_at = Column(DateTime, nullable=True)
+    address_id = Column(String(255), nullable=True)
+    created_at = Column(DateTime, nullable=True)
+    invoice_id = Column(String(255), nullable=True)
+    revised_at = Column(DateTime, nullable=True)
+    updated_at = Column(DateTime, nullable=True)
+    business_id = Column(String(255), nullable=True)
+    custom_data = Column(JSON, nullable=True)
+    customer_id = Column(String(255), nullable=True)
+    discount_id = Column(String(255), nullable=True)
+    receipt_data = Column(JSON, nullable=True)
+    currency_code = Column(String(16), nullable=True)
+    billing_period = Column(JSON, nullable=True)
+    invoice_number = Column(String(255), nullable=True)
+    billing_details = Column(JSON, nullable=True)
+    collection_mode = Column(String(255), nullable=True)
+    subscription_id = Column(String(255), nullable=True)
 
 class BillingResponse(BaseModel):
     subscription: Optional[Dict[str, Any]] = None

@@ -57,6 +57,37 @@ def migrate(migrator: Migrator, database: pw.Database, *, fake=False):
         class Meta:
             table_name = "subscriptions"
 
+    @migrator.create_model
+    class Transaction(pw.Model):
+        id = pw.CharField(max_length=255, primary_key=True)
+        items = pw.TextField(null=True)  # Store as JSON string
+        origin = pw.CharField(max_length=255, null=True)
+        status = pw.CharField(max_length=255, null=True)
+        details = pw.TextField(null=True)  # Store as JSON string
+        checkout = pw.TextField(null=True)  # Store as JSON string
+        payments = pw.TextField(null=True)  # Store as JSON string
+        billed_at = pw.DateTimeField(null=True)
+        address_id = pw.CharField(max_length=255, null=True)
+        created_at = pw.DateTimeField(null=True)
+        invoice_id = pw.CharField(max_length=255, null=True)
+        revised_at = pw.DateTimeField(null=True)
+        updated_at = pw.DateTimeField(null=True)
+        business_id = pw.CharField(max_length=255, null=True)
+        custom_data = pw.TextField(null=True)  # Store as JSON string
+        customer_id = pw.CharField(max_length=255, null=True)
+        discount_id = pw.CharField(max_length=255, null=True)
+        receipt_data = pw.TextField(null=True)  # Store as JSON string
+        currency_code = pw.CharField(max_length=16, null=True)
+        billing_period = pw.TextField(null=True)  # Store as JSON string
+        invoice_number = pw.CharField(max_length=255, null=True)
+        billing_details = pw.TextField(null=True)  # Store as JSON string
+        collection_mode = pw.CharField(max_length=255, null=True)
+        subscription_id = pw.CharField(max_length=255, null=True)
+
+        class Meta:
+            table_name = "transactions"
+
 
 def rollback(migrator: Migrator, database: pw.Database, *, fake=False):    
     migrator.remove_model("subscriptions")
+    migrator.remove_model("transactions")
